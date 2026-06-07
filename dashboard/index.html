@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HotelOS — Mehmonxona boshqaruvi</title>
+    <style>
+        :root {
+            --primary: #1F4E5F;
+            --secondary: #4F6F52;
+            --accent: #D6B36A;
+            --bg: #F5F7F9;
+            --card: #FFFFFF;
+            --border: #DCE3EA;
+            --text: #1E293B;
+            --muted: #64748B;
+            --soft: #EEF3F6;
+            --danger: #B42318;
+            --danger-bg: #FFF1F0;
+            --warn: #A15C07;
+            --warn-bg: #FFF7E6;
+            --good: #20735A;
+            --good-bg: #ECFDF5;
+            --blue-bg: #ECF6FF;
+            --shadow: 0 14px 36px rgba(15, 23, 42, .08);
+            --radius: 18px;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        button, input, select, textarea { font: inherit; }
+        button { cursor: pointer; }
+        .hidden { display: none !important; }
+
+        .auth-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: minmax(360px, 1fr) minmax(420px, 520px);
+            background:
+                radial-gradient(circle at 18% 18%, rgba(214, 179, 106, .22), transparent 28%),
+                linear-gradient(135deg, #F8FAFC 0%, #EEF3F6 100%);
+        }
+
+        .auth-story {
+            padding: 56px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-right: 1px solid var(--border);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+            color: var(--primary);
+            font-size: 22px;
+        }
+
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: var(--primary);
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            box-shadow: 0 12px 24px rgba(31, 78, 95, .18);
+        }
+
+        .auth-copy h1 {
+            max-width: 720px;
+            margin: 54px 0 18px;
+            font-size: clamp(38px, 5vw, 68px);
+            line-height: .95;
+            letter-spacing: -.06em;
+            color: #142433;
+        }
+
+        .auth-copy p {
+            max-width: 580px;
+            color: var(--muted);
+            font-size: 18px;
+            line-height: 1.7;
+        }
+
+        .auth-proof {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            max-width: 720px;
+        }
+
+        .proof-card {
+            background: rgba(255,255,255,.72);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px;
+        }
+
+        .proof-card b { display: block; font-size: 22px; color: var(--primary); }
+        .proof-card span { color: var(--muted); font-size: 13px; }
+
+        .auth-panel {
+            display: grid;
+            place-items: center;
+            padding: 34px;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .auth-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: var(--soft);
+            padding: 5px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+        }
+
+        .auth-tab {
+            border: 0;
+            background: transparent;
+            border-radius: 11px;
+            padding: 10px;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .auth-tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 6px 16px rgba(15,23,42,.07);
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 282px 1fr;
+        }
+
+        .sidebar {
+            background: #FBFCFD;
+            border-right: 1px solid var(--border);
+            padding: 26px 20px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .user-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+        }
+
+        .user-card strong { display: block; font-size: 14px; }
+        .user-card span { color: var(--muted); font-size: 12px; }
+
+        .nav { display: grid; gap: 6px; }
+        .nav-btn {
+            border: 0;
+            background: transparent;
+            color: var(--muted);
+            text-align: left;
+            padding: 12px 13px;
+            border-radius: 13px;
+            font-weight: 750;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-btn:hover { background: var(--soft); color: var(--primary); }
+        .nav-btn.active {
+            background: #E8F0F2;
+            color: var(--primary);
+        }
+
+        .sidebar-note {
+            margin-top: auto;
+            border: 1px solid #E5D6A8;
+            background: #FFFBF0;
+            color: #72551B;
+            border-radius: 18px;
+            padding: 16px;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .workspace {
+            min-width: 0;
+            padding: 22px 26px 34px;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(245, 247, 249, .92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(220, 227, 234, .75);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0 18px;
+            margin-bottom: 18px;
+        }
+
+        .topbar h2 { margin: 0; font-size: 22px; letter-spacing: -.03em; }
+        .topbar p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+        .top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            background: white;
+            padding: 9px 12px;
+            border-radius: 999px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #CBD5E1;
+        }
+        .dot.connected { background: var(--good); box-shadow: 0 0 0 4px rgba(32,115,90,.12); }
+
+        .view { display: none; }
+        .view.active { display: block; }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            align-items: flex-start;
+            margin-bottom: 18px;
+        }
+
+        .kicker {
+            color: var(--secondary);
+            text-transform: uppercase;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: .12em;
+        }
+
+        .title {
+            font-size: 30px;
+            line-height: 1.1;
+            letter-spacing: -.05em;
+            font-weight: 850;
+            margin-top: 4px;
+        }
+
+        .hint {
+            color: var(--muted);
+            margin: 8px 0 0;
+            line-height: 1.6;
+        }
+
+        .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
+        .ops-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(320px, .8fr); gap: 14px; }
+
+        .panel, .metric {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 22px rgba(15, 23, 42, .04);
+        }
+
+        .panel { padding: 18px; margin-bottom: 14px; }
+        .metric { padding: 18px; }
+        .metric span { color: var(--muted); font-size: 13px; font-weight: 750; }
+        .metric strong { display: block; margin-top: 8px; font-size: 34px; letter-spacing: -.06em; }
+        .metric small { color: var(--muted); }
+        .metric.critical { border-color: #F3B5AE; background: var(--danger-bg); }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+            font-weight: 850;
+            letter-spacing: -.02em;
+        }
+
+        .summary-list, .algorithm, .guest-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .summary-row, .algorithm span, .guest-item {
+            border: 1px solid var(--border);
+            background: #FBFCFD;
+            border-radius: 14px;
+            padding: 12px;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        .summary-row b, .algorithm b, .guest-item b { color: var(--text); }
+
+        .rooms-board { display: grid; gap: 14px; }
+        .floor {
+            border: 1px solid var(--border);
+            background: #FBFCFD;
+            border-radius: 16px;
+            padding: 14px;
+        }
+        .floor-label {
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+        .room-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+            gap: 10px;
+        }
+        .room-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--border);
+            border-radius: 15px;
+            padding: 12px;
+        }
+        .room-card.clean { border-left-color: var(--good); }
+        .room-card.occupied { border-left-color: var(--primary); }
+        .room-card.dirty, .room-card.cleaning { border-left-color: var(--warn); }
+        .room-card.maintenance { border-left-color: var(--danger); }
+        .room-num { font-size: 18px; font-weight: 900; letter-spacing: -.03em; }
+        .room-meta { color: var(--muted); font-size: 12px; margin-top: 8px; line-height: 1.45; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 5px 9px;
+            font-size: 12px;
+            font-weight: 850;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .s-clean, .s-completed, .s-delivered, .s-low { color: var(--good); background: var(--good-bg); border-color: #BFE7D7; }
+        .s-occupied, .s-preparing, .s-pending, .s-normal { color: var(--primary); background: var(--blue-bg); border-color: #C9E2F4; }
+        .s-dirty, .s-cleaning, .s-in_progress, .s-high { color: var(--warn); background: var(--warn-bg); border-color: #F2D7A8; }
+        .s-maintenance, .s-critical, .s-cancelled { color: var(--danger); background: var(--danger-bg); border-color: #F3B5AE; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .field { display: grid; gap: 7px; }
+        .field.full, .actions { grid-column: 1 / -1; }
+        label { color: var(--text); font-size: 13px; font-weight: 800; }
+        input, select, textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: white;
+            color: var(--text);
+            padding: 11px 12px;
+            outline: none;
+        }
+        textarea { min-height: 92px; resize: vertical; }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(31, 78, 95, .08);
+        }
+
+        .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .btn {
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text);
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-weight: 850;
+        }
+        .btn:hover { border-color: #B8C4CF; }
+        .btn.primary { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn.secondary { background: var(--secondary); color: white; border-color: var(--secondary); }
+        .btn.accent { background: var(--accent); color: #33250A; border-color: var(--accent); }
+        .btn.danger { background: var(--danger); color: white; border-color: var(--danger); }
+        .btn.ghost { background: transparent; }
+
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
+        th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+        tr.critical-row { background: var(--danger-bg); }
+
+        .timeline {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 10px;
+        }
+        .timeline li {
+            position: relative;
+            border: 1px solid var(--border);
+            background: #FBFCFD;
+            border-radius: 15px;
+            padding: 12px 12px 12px 42px;
+        }
+        .timeline li::before {
+            content: "";
+            position: absolute;
+            left: 15px;
+            top: 16px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+        .event-time { color: var(--muted); font-size: 12px; }
+        .event-type { font-weight: 900; margin: 2px 0 4px; }
+
+        .chat-box {
+            display: grid;
+            gap: 10px;
+            max-height: 420px;
+            overflow: auto;
+            padding-right: 4px;
+        }
+        .chat-message {
+            border: 1px solid var(--border);
+            background: #FBFCFD;
+            border-radius: 16px;
+            padding: 12px;
+            line-height: 1.5;
+        }
+        .chat-message small { display: block; color: var(--muted); margin-top: 7px; }
+
+        .guest-hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+            gap: 14px;
+        }
+
+        .notice {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            max-width: 380px;
+            background: #142433;
+            color: white;
+            border-radius: 16px;
+            padding: 14px 16px;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transform: translateY(14px);
+            pointer-events: none;
+            transition: .18s ease;
+            z-index: 99;
+        }
+        .notice.show { opacity: 1; transform: translateY(0); }
+        .notice.bad { background: var(--danger); }
+        .notice.good { background: var(--good); }
+
+        @media (max-width: 1100px) {
+            .auth-shell, .app-shell, .ops-layout, .guest-hero { grid-template-columns: 1fr; }
+            .auth-story { display: none; }
+            .sidebar { position: static; height: auto; }
+            .grid-4, .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 720px) {
+            .workspace { padding: 16px; }
+            .grid-4, .grid-3, .grid-2, .form-grid { grid-template-columns: 1fr; }
+            .topbar, .section-head { flex-direction: column; align-items: flex-start; }
+            .auth-panel { padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+<section class="auth-shell" id="authShell">
+    <div class="auth-story">
+        <div class="brand"><span class="brand-mark">H</span><span>HotelOS</span></div>
+        <div class="auth-copy">
+            <h1>Mehmonxona ish jarayonlari uchun yagona boshqaruv maydoni.</h1>
+            <p>Qabulxona, xonalar, tozalash, texnik xizmat va buyurtmalar bir joyda boshqariladi. Har bir rol faqat o'ziga kerakli ma'lumotni ko'radi.</p>
+        </div>
+        <div class="auth-proof">
+            <div class="proof-card"><b>24/7</b><span>operatsion nazorat</span></div>
+            <div class="proof-card"><b>2 rol</b><span>administrator va mehmon</span></div>
+            <div class="proof-card"><b>aniq</b><span>xona va xizmat holatlari</span></div>
+        </div>
+    </div>
+    <div class="auth-panel">
+        <div class="auth-card">
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-auth-tab="login">Kirish</button>
+                <button class="auth-tab" data-auth-tab="signup">Ro'yxatdan o'tish</button>
+            </div>
+
+            <form id="loginForm" class="form-grid">
+                <div class="field full"><label>Email</label><input name="email" type="email" placeholder="admin@hotelos.uz" required></div>
+                <div class="field full"><label>Parol</label><input name="password" type="password" placeholder="Parolni kiriting" required></div>
+                <div class="actions"><button class="btn primary">Tizimga kirish</button></div>
+                <p class="hint">Demo administrator: <b>admin@hotelos.uz</b> / <b>admin123</b></p>
+            </form>
+
+            <form id="signupForm" class="form-grid hidden">
+                <div class="field full"><label>F.I.Sh.</label><input name="full_name" placeholder="Ali Karimov" required></div>
+                <div class="field full"><label>Email</label><input name="email" type="email" placeholder="ali@example.com" required></div>
+                <div class="field"><label>Rol</label><select name="role" id="signupRole"><option value="guest">Mehmon</option><option value="admin">Administrator</option></select></div>
+                <div class="field"><label>Mehmon ID</label><input name="guest_id" placeholder="M001"></div>
+                <div class="field full"><label>Parol</label><input name="password" type="password" minlength="4" placeholder="Kamida 4 belgi" required></div>
+                <div class="actions"><button class="btn secondary">Hisob yaratish</button></div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="app-shell hidden" id="appShell">
+    <aside class="sidebar">
+        <div class="brand"><span class="brand-mark">H</span><span>HotelOS</span></div>
+        <div class="user-card">
+            <div class="avatar" id="userAvatar">A</div>
+            <div><strong id="userName">Administrator</strong><span id="userRole">Administrator</span></div>
+        </div>
+        <nav class="nav" id="adminNav">
+            <button class="nav-btn active" data-view="dashboard">Boshqaruv paneli</button>
+            <button class="nav-btn" data-view="reception">Qabulxona</button>
+            <button class="nav-btn" data-view="housekeeping">Tozalash xizmati</button>
+            <button class="nav-btn" data-view="roomservice">Xona xizmati</button>
+            <button class="nav-btn" data-view="maintenance">Texnik xizmat</button>
+            <button class="nav-btn" data-view="chat">Xodimlar suhbati</button>
+            <button class="nav-btn" data-view="activity">Tizim faolligi</button>
+        </nav>
+        <nav class="nav hidden" id="guestNav">
+            <button class="nav-btn active" data-view="guest-profile">Profil</button>
+            <button class="nav-btn" data-view="guest-room">Mening xonam</button>
+            <button class="nav-btn" data-view="guest-orders">Buyurtmalar tarixi</button>
+            <button class="nav-btn" data-view="guest-services">Xizmat so'rovlari</button>
+            <button class="nav-btn" data-view="guest-info">Shaxsiy ma'lumotlar</button>
+        </nav>
+        <div class="sidebar-note">Mehmonxona jamoasi uchun sokin, aniq va tezkor ish muhiti.</div>
+        <button class="btn ghost" id="logoutBtn">Chiqish</button>
+    </aside>
+
+    <main class="workspace">
+        <header class="topbar">
+            <div><h2 id="viewTitle">Boshqaruv paneli</h2><p id="viewSubtitle">Bugungi mehmonxona holati va muhim ishlar.</p></div>
+            <div class="top-actions">
+                <span class="pill"><span class="dot" id="statusDot"></span><span id="statusText">Ulanmoqda</span></span>
+                <span class="pill" id="todayLabel"></span>
+            </div>
+        </header>
+
+        <div id="adminViews">
+            <section class="view active" id="view-dashboard">
+                <div class="section-head">
+                    <div><div class="kicker">Umumiy nazorat</div><div class="title">Bugungi operatsion holat</div><p class="hint">Xonalar, mehmonlar va xizmatlar bo'yicha tezkor qaror qabul qilish maydoni.</p></div>
+                </div>
+                <div class="grid-4">
+                    <div class="metric"><span>Faol mehmonlar</span><strong id="activeGuests">0</strong><small>mehmonxonada yashamoqda</small></div>
+                    <div class="metric"><span>Xona bandligi</span><strong id="occupancyRate">0%</strong><small id="occupiedRooms">0 xona band</small></div>
+                    <div class="metric"><span>Tozalash holati</span><strong id="cleaningRooms">0</strong><small id="cleanRooms">0 tayyor xona</small></div>
+                    <div class="metric critical"><span>Texnik so'rovlar</span><strong id="pendingIssues">0</strong><small>e'tibor talab qiladi</small></div>
+                </div>
+                <div class="ops-layout" style="margin-top:14px">
+                    <div class="panel"><div class="panel-title">Xona status taxtasi <span class="badge s-normal" id="roomServiceActivity">0 faol buyurtma</span></div><div class="rooms-board" id="roomsGrid"></div></div>
+                    <div class="panel"><div class="panel-title">So'nggi faollik</div><ul class="timeline" id="eventList"></ul></div>
+                </div>
+            </section>
+
+            <section class="view" id="view-reception">
+                <div class="section-head"><div><div class="kicker">Qabulxona</div><div class="title">Mehmonlarni joylashtirish</div><p class="hint">Mehmonni ro'yxatdan o'tkazish, mos xona tanlash va chiqish jarayonlari.</p></div></div>
+                <div class="grid-2">
+                    <div class="panel"><div class="panel-title">Ro'yxatdan o'tkazish</div><form class="form-grid" id="checkinForm">
+                        <div class="field"><label>Mehmon ID</label><input name="guest_id" placeholder="M001" required></div>
+                        <div class="field"><label>Mehmon F.I.Sh.</label><input name="full_name" placeholder="Ali Karimov" required></div>
+                        <div class="field"><label>Xona turi</label><select name="room_type"><option value="single">Bir kishilik</option><option value="double">Ikki kishilik</option><option value="suite">Lyuks</option><option value="accessible">Qulaylashtirilgan</option></select></div>
+                        <div class="field"><label>Qavat afzalligi</label><select name="floor_preference"><option value="">Farqi yo'q</option><option>1</option><option>2</option><option>3</option></select></div>
+                        <div class="field"><label>Joylashuv</label><select name="proximity_preference"><option value="none">Farqi yo'q</option><option value="elevator">Lift yonida</option><option value="stairs">Zina yonida</option></select></div>
+                        <div class="actions"><button class="btn primary">Ro'yxatdan o'tkazish</button></div>
+                    </form></div>
+                    <div class="panel"><div class="panel-title">Xona tayinlash tartibi</div><div class="algorithm">
+                        <span><b>1.</b> Avval tayyor xonalar ajratib olinadi.</span>
+                        <span><b>2.</b> Xona turi, qavat va joylashuv afzalligi solishtiriladi.</span>
+                        <span><b>3.</b> Eng mos va uzoqroq tayyor turgan xona tanlanadi.</span>
+                        <span><b>4.</b> Natija mehmon kartasiga bog'lanadi.</span>
+                        <span id="lastAssignment">Oxirgi tayinlash: hali bajarilmadi.</span>
+                    </div></div>
+                </div>
+                <div class="grid-2">
+                    <div class="panel"><div class="panel-title">Chiqish qilish</div><form class="form-grid" id="checkoutForm"><div class="field"><label>Mehmon ID</label><input name="guest_id" placeholder="M001" required></div><div class="field"><label>Chegirma foizi</label><input name="discount_percent" type="number" min="0" max="100" value="0"></div><div class="actions"><button class="btn accent">Chiqish qilish</button></div></form></div>
+                    <div class="panel"><div class="panel-title">Mehmon qidirish</div><form class="form-grid" id="guestSearchForm"><div class="field"><label>Mehmon ID</label><input name="guest_id" placeholder="M001" required></div><div class="actions"><button class="btn">Qidirish</button></div></form><p class="hint" id="guestSearchResult">Qidiruv natijasi shu yerda ko'rsatiladi.</p></div>
+                </div>
+                <div class="panel"><div class="panel-title">Faol mehmonlar</div><div class="table-wrap"><table><thead><tr><th>ID</th><th>F.I.Sh.</th><th>Xona</th><th>Xona turi</th><th>Kelgan vaqt</th></tr></thead><tbody id="guestsTable"></tbody></table></div></div>
+            </section>
+
+            <section class="view" id="view-housekeeping">
+                <div class="section-head"><div><div class="kicker">Tozalash xizmati</div><div class="title">Xonalarni tayyorlash navbati</div><p class="hint">Iflos xonalar, vazifa holati va xodim biriktirish jarayoni.</p></div></div>
+                <div class="grid-2">
+                    <div class="panel"><div class="panel-title">Vazifa yaratish</div><form class="form-grid" id="cleanTaskForm"><div class="field"><label>Xona</label><select name="room_number" id="dirtyRoomSelect"></select></div><div class="field"><label>Ustuvorlik</label><select name="priority"><option value="normal">Oddiy</option><option value="high">Yuqori</option><option value="low">Past</option></select></div><div class="actions"><button class="btn primary">Vazifa yaratish</button></div></form></div>
+                    <div class="panel"><div class="panel-title">Tayyorlash kerak bo'lgan xonalar</div><div id="dirtyRoomsList" class="algorithm"></div></div>
+                </div>
+                <div class="panel"><div class="panel-title">Tozalash navbati</div><div class="table-wrap"><table><thead><tr><th>Xona</th><th>Holat</th><th>Ustuvorlik</th><th>Xodim</th><th>Amal</th></tr></thead><tbody id="tasksTable"></tbody></table></div></div>
+            </section>
+
+            <section class="view" id="view-roomservice">
+                <div class="section-head"><div><div class="kicker">Xona xizmati</div><div class="title">Buyurtmalarni boshqarish</div><p class="hint">Menyu, yangi buyurtmalar va yetkazib berish holati.</p></div></div>
+                <div class="grid-2">
+                    <div class="panel"><div class="panel-title">Buyurtma yaratish</div><form class="form-grid" id="orderForm"><div class="field"><label>Xona</label><select name="room_number" id="orderRoomSelect"></select></div><div class="field"><label>Mehmon ID</label><input name="guest_id" placeholder="M001" required></div><div class="field"><label>Menyu</label><select id="menuSelect"></select></div><div class="field"><label>Soni</label><input name="quantity" type="number" min="1" max="10" value="1"></div><div class="field full"><label>Izoh</label><input name="notes" placeholder="Masalan: achchiq bo'lmasin"></div><div class="actions"><button class="btn primary">Buyurtma yaratish</button></div></form></div>
+                    <div class="panel"><div class="panel-title">Menyu</div><div class="table-wrap"><table><thead><tr><th>Nomi</th><th>Tur</th><th>Narx</th></tr></thead><tbody id="menuTable"></tbody></table></div></div>
+                </div>
+                <div class="panel"><div class="panel-title">Faol buyurtmalar</div><div class="table-wrap"><table><thead><tr><th>Xona</th><th>Buyurtma</th><th>Soni</th><th>Summa</th><th>Holat</th><th>Amal</th></tr></thead><tbody id="ordersTable"></tbody></table></div></div>
+            </section>
+
+            <section class="view" id="view-maintenance">
+                <div class="section-head"><div><div class="kicker">Texnik xizmat</div><div class="title">Muammolar va ustuvor navbat</div><p class="hint">Xona muammolari darajasi bo'yicha tartiblanadi va texniklarga biriktiriladi.</p></div></div>
+                <div class="grid-2">
+                    <div class="panel"><div class="panel-title">Texnik so'rov yaratish</div><form class="form-grid" id="issueForm"><div class="field"><label>Xona</label><select name="room_number" id="issueRoomSelect"></select></div><div class="field"><label>Ustuvorlik</label><select name="priority"><option value="critical">Juda muhim</option><option value="high">Yuqori</option><option value="normal" selected>Oddiy</option><option value="low">Past</option></select></div><div class="field full"><label>Muammo tavsifi</label><textarea name="description" placeholder="Masalan: konditsioner ishlamayapti" required></textarea></div><div class="actions"><button class="btn danger">So'rov yaratish</button></div></form></div>
+                    <div class="panel"><div class="panel-title">Texniklar</div><div class="table-wrap"><table><thead><tr><th>ID</th><th>F.I.Sh.</th><th>Smena</th><th>Holat</th></tr></thead><tbody id="techTable"></tbody></table></div></div>
+                </div>
+                <div class="panel"><div class="panel-title">Texnik navbat</div><div class="table-wrap"><table><thead><tr><th>Xona</th><th>Tavsif</th><th>Ustuvorlik</th><th>Holat</th><th>Texnik</th><th>Amal</th></tr></thead><tbody id="issuesTable"></tbody></table></div></div>
+            </section>
+
+            <section class="view" id="view-chat">
+                <div class="section-head"><div><div class="kicker">Xodimlar suhbati</div><div class="title">Ichki aloqa</div><p class="hint">Jamoa xabarlari, xona bo'yicha eslatmalar va xizmat koordinatsiyasi.</p></div></div>
+                <div class="grid-2">
+                    <div class="panel"><div class="panel-title">Xabar yuborish</div><form class="form-grid" id="chatForm"><div class="field"><label>Yuboruvchi</label><input name="sender" placeholder="Qabulxona" required></div><div class="field"><label>Xona</label><select name="room_number" id="chatRoomSelect"></select></div><div class="field full"><label>Xabar</label><textarea name="message" placeholder="Xodimlar uchun xabar yozing" required></textarea></div><div class="actions"><button class="btn primary">Xabar yuborish</button></div></form></div>
+                    <div class="panel"><div class="panel-title">Xabarlar tarixi</div><div class="chat-box" id="chatMessages"></div></div>
+                </div>
+            </section>
+
+            <section class="view" id="view-activity">
+                <div class="section-head"><div><div class="kicker">Tizim faolligi</div><div class="title">Operatsion hodisalar</div><p class="hint">Muhim mehmonxona amallari bir lentada ko'rsatiladi.</p></div></div>
+                <div class="panel"><ul class="timeline" id="activityTimeline"></ul></div>
+            </section>
+        </div>
+
+        <div id="guestViews" class="hidden">
+            <section class="view" id="view-guest-profile">
+                <div class="guest-hero">
+                    <div class="panel"><div class="kicker">Mehmon profili</div><div class="title">Xush kelibsiz, <span id="guestProfileName">Mehmon</span></div><p class="hint">Bu yerda xona, buyurtmalar va xizmat so'rovlaringizni kuzatishingiz mumkin.</p></div>
+                    <div class="panel"><div class="panel-title">Joriy xona</div><div class="summary-list" id="guestRoomSummary"></div></div>
+                </div>
+            </section>
+            <section class="view" id="view-guest-room">
+                <div class="section-head"><div><div class="kicker">Mening xonam</div><div class="title">Xona ma'lumotlari</div><p class="hint">Xonangiz holati va asosiy ma'lumotlari.</p></div></div>
+                <div class="panel"><div class="rooms-board" id="guestRoomBoard"></div></div>
+            </section>
+            <section class="view" id="view-guest-orders">
+                <div class="section-head"><div><div class="kicker">Buyurtmalar</div><div class="title">Buyurtmalar tarixi</div><p class="hint">Xona xizmati buyurtmalaringiz holati.</p></div></div>
+                <div class="panel"><div class="table-wrap"><table><thead><tr><th>Xona</th><th>Buyurtma</th><th>Soni</th><th>Summa</th><th>Holat</th></tr></thead><tbody id="guestOrdersTable"></tbody></table></div></div>
+            </section>
+            <section class="view" id="view-guest-services">
+                <div class="section-head"><div><div class="kicker">Xizmatlar</div><div class="title">Xizmat so'rovlari</div><p class="hint">Xona xizmati yoki texnik yordam so'rovini yuboring.</p></div></div>
+                <div class="grid-2">
+                    <div class="panel"><div class="panel-title">Xona xizmati so'rovi</div><form class="form-grid" id="guestOrderForm"><div class="field full"><label>Menyu</label><select id="guestMenuSelect"></select></div><div class="field"><label>Soni</label><input name="quantity" type="number" min="1" max="10" value="1"></div><div class="field full"><label>Izoh</label><input name="notes" placeholder="Qo'shimcha istaklaringiz"></div><div class="actions"><button class="btn primary">Buyurtma yuborish</button></div></form></div>
+                    <div class="panel"><div class="panel-title">Texnik yordam</div><form class="form-grid" id="guestIssueForm"><div class="field"><label>Ustuvorlik</label><select name="priority"><option value="normal">Oddiy</option><option value="high">Yuqori</option><option value="critical">Juda muhim</option></select></div><div class="field full"><label>Muammo tavsifi</label><textarea name="description" placeholder="Muammoni qisqacha yozing" required></textarea></div><div class="actions"><button class="btn danger">So'rov yuborish</button></div></form></div>
+                </div>
+            </section>
+            <section class="view" id="view-guest-info">
+                <div class="section-head"><div><div class="kicker">Shaxsiy ma'lumotlar</div><div class="title">Hisob sozlamalari</div><p class="hint">Mehmon profilingiz uchun saqlangan ma'lumotlar.</p></div></div>
+                <div class="panel"><div class="summary-list" id="guestInfoList"></div></div>
+            </section>
+        </div>
+    </main>
+</section>
+
+<div class="notice" id="notice"></div>
+
+<script>
+const API = 'http://localhost:8000'
+const WS_URL = 'ws://localhost:3000/ws/dashboard'
+const USERS_KEY = 'hotelos_users'
+const SESSION_KEY = 'hotelos_session'
+
+const state = { rooms: [], guests: [], tasks: [], cleaners: [], menu: [], orders: [], issues: [], technicians: [], messages: [], events: [], session: null }
+
+const titles = {
+    dashboard: ['Boshqaruv paneli', 'Bugungi mehmonxona holati va muhim ishlar.'],
+    reception: ['Qabulxona', 'Mehmonlarni joylashtirish va hisobdan chiqarish.'],
+    housekeeping: ['Tozalash xizmati', 'Xonalarni navbat bo‘yicha tayyorlash.'],
+    roomservice: ['Xona xizmati', 'Buyurtmalar va yetkazib berish jarayoni.'],
+    maintenance: ['Texnik xizmat', 'Muammolar, ustuvorlik va texniklar holati.'],
+    chat: ['Xodimlar suhbati', 'Jamoa ichki aloqasi.'],
+    activity: ['Tizim faolligi', 'Mehmonxona bo‘yicha oxirgi hodisalar.'],
+    'guest-profile': ['Profil', 'Mehmon uchun shaxsiy boshqaruv sahifasi.'],
+    'guest-room': ['Mening xonam', 'Xonangiz bo‘yicha ma’lumotlar.'],
+    'guest-orders': ['Buyurtmalar tarixi', 'Xona xizmati buyurtmalaringiz.'],
+    'guest-services': ['Xizmat so‘rovlari', 'Yangi xizmat yoki yordam so‘rovi.'],
+    'guest-info': ['Shaxsiy ma’lumotlar', 'Hisobingizda saqlangan ma’lumotlar.']
+}
+
+const statusText = { clean: 'Tayyor', dirty: 'Iflos', occupied: 'Band', cleaning: 'Tozalanmoqda', maintenance: 'Texnik xizmat', pending: 'Kutilmoqda', in_progress: 'Jarayonda', completed: 'Yakunlandi', delivered: 'Yetkazildi', cancelled: 'Bekor qilindi', preparing: 'Tayyorlanmoqda' }
+const priorityText = { critical: 'Juda muhim', high: 'Yuqori', normal: 'Oddiy', low: 'Past' }
+const roomTypeText = { single: 'Bir kishilik', double: 'Ikki kishilik', suite: 'Lyuks', accessible: 'Qulaylashtirilgan' }
+const proximityText = { none: 'Oddiy joylashuv', elevator: 'Lift yonida', stairs: 'Zina yonida' }
+const categoryText = { food: 'Taom', beverage: 'Ichimlik', housekeeping: 'Tozalash buyumi', other: 'Boshqa' }
+const shiftText = { morning: 'Ertalab', evening: 'Kechki' }
+const roleText = { admin: 'Administrator', guest: 'Mehmon' }
+const eventLabels = { checkin: 'Ro‘yxatdan o‘tish', checkout: 'Chiqish', cleaning_started: 'Tozalash boshlandi', room_cleaned: 'Xona tozalandi', new_order: 'Buyurtma yaratildi', order_delivered: 'Buyurtma yetkazildi', maintenance_request: 'Texnik so‘rov', maintenance_completed: 'Texnik ish yakunlandi', maintenance_assigned: 'Texnik tayinlandi', chat_message: 'Xodim xabari' }
+
+let ws = null
+let reloadTimer = null
+
+function el(id) { return document.getElementById(id) }
+function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])) }
+function formatTime(value) { return value ? new Date(value).toLocaleString('uz-UZ', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' }) : '-' }
+function todayText() { return new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: '2-digit', month: 'long' }) }
+
+async function api(path, options = {}) {
+    const response = await fetch(`${API}${path}`, { ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } })
+    const text = await response.text()
+    const data = text ? JSON.parse(text) : null
+    if (!response.ok) {
+        const message = data?.detail || 'So‘rov bajarilmadi'
+        throw new Error(Array.isArray(message) ? message.map(x => x.msg).join(', ') : message)
+    }
+    return data
+}
+
+function notify(message, kind = 'good') {
+    const box = el('notice')
+    box.textContent = message
+    box.className = `notice show ${kind}`
+    setTimeout(() => box.className = 'notice', 3200)
+}
+
+function defaultUsers() {
+    return [{ full_name: 'Bosh administrator', email: 'admin@hotelos.uz', password: 'admin123', role: 'admin', guest_id: '' }]
+}
+
+function users() {
+    const stored = JSON.parse(localStorage.getItem(USERS_KEY) || 'null')
+    if (stored) return stored
+    localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers()))
+    return defaultUsers()
+}
+
+function saveUsers(list) { localStorage.setItem(USERS_KEY, JSON.stringify(list)) }
+function setSession(user) { localStorage.setItem(SESSION_KEY, JSON.stringify(user)); state.session = user; showApp() }
+function clearSession() { localStorage.removeItem(SESSION_KEY); state.session = null; if (ws) ws.close(); showAuth() }
+
+function showAuth() {
+    el('authShell').classList.remove('hidden')
+    el('appShell').classList.add('hidden')
+}
+
+function showApp() {
+    const user = state.session
+    el('authShell').classList.add('hidden')
+    el('appShell').classList.remove('hidden')
+    el('userName').textContent = user.full_name
+    el('userRole').textContent = roleText[user.role]
+    el('userAvatar').textContent = user.full_name.trim().charAt(0).toUpperCase()
+    el('todayLabel').textContent = todayText()
+    const isAdmin = user.role === 'admin'
+    el('adminNav').classList.toggle('hidden', !isAdmin)
+    el('guestNav').classList.toggle('hidden', isAdmin)
+    el('adminViews').classList.toggle('hidden', !isAdmin)
+    el('guestViews').classList.toggle('hidden', isAdmin)
+    setView(isAdmin ? 'dashboard' : 'guest-profile')
+    connectWS()
+    loadAll().catch(error => notify(error.message, 'bad'))
+}
+
+function setView(name) {
+    document.querySelectorAll('.view').forEach(view => view.classList.remove('active'))
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.view === name))
+    el(`view-${name}`).classList.add('active')
+    el('viewTitle').textContent = titles[name]?.[0] || 'HotelOS'
+    el('viewSubtitle').textContent = titles[name]?.[1] || ''
+}
+
+function connectWS() {
+    if (ws && [WebSocket.OPEN, WebSocket.CONNECTING].includes(ws.readyState)) return
+    ws = new WebSocket(WS_URL)
+    ws.onopen = () => { el('statusDot').classList.add('connected'); el('statusText').textContent = 'Jonli yangilanish' }
+    ws.onclose = () => { el('statusDot').classList.remove('connected'); el('statusText').textContent = 'Qayta ulanmoqda'; if (state.session) setTimeout(connectWS, 2500) }
+    ws.onerror = () => ws.close()
+    ws.onmessage = event => { addEvent(JSON.parse(event.data)); scheduleReload() }
+}
+
+function scheduleReload() { clearTimeout(reloadTimer); reloadTimer = setTimeout(loadAll, 450) }
+
+async function loadAll() {
+    const [rooms, guests, tasks, cleaners, menu, orders, issues, technicians, messages] = await Promise.all([
+        api('/api/reception/rooms'), api('/api/reception/guests'), api('/api/cleaning/tasks'), api('/api/cleaning/cleaners'),
+        api('/api/room/menu'), api('/api/room/orders'), api('/api/maintenance/issues'), api('/api/maintenance/technicians'), api('/api/chat/messages')
+    ])
+    Object.assign(state, { rooms, guests, tasks, cleaners, menu, orders, issues, technicians, messages })
+    renderAll()
+}
+
+function renderAll() {
+    renderMetrics(); renderRooms(); renderSelects(); renderGuests(); renderCleaning(); renderRoomService(); renderMaintenance(); renderChat(); renderEvents(); renderGuestViews()
+}
+
+function renderMetrics() {
+    const occupied = state.rooms.filter(r => r.status === 'occupied').length
+    el('activeGuests').textContent = state.guests.length
+    el('occupancyRate').textContent = state.rooms.length ? `${Math.round((occupied / state.rooms.length) * 100)}%` : '0%'
+    el('occupiedRooms').textContent = `${occupied} xona band`
+    el('cleanRooms').textContent = `${state.rooms.filter(r => r.status === 'clean').length} tayyor xona`
+    el('cleaningRooms').textContent = state.rooms.filter(r => r.status === 'cleaning').length
+    el('pendingIssues').textContent = state.issues.filter(i => i.status !== 'completed').length
+    el('roomServiceActivity').textContent = `${state.orders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length} faol buyurtma`
+}
+
+function renderRooms() {
+    const grouped = state.rooms.reduce((acc, room) => { (acc[room.floor || 'Boshqa'] ||= []).push(room); return acc }, {})
+    el('roomsGrid').innerHTML = Object.keys(grouped).sort((a,b) => Number(a)-Number(b)).map(floor => `
+        <div class="floor"><div class="floor-label">${floor}-qavat</div><div class="room-list">
+            ${grouped[floor].sort((a,b) => a.room_number.localeCompare(b.room_number, undefined, {numeric:true})).map(room => roomCard(room)).join('')}
+        </div></div>`).join('')
+}
+
+function roomCard(room) {
+    return `<div class="room-card ${room.status}"><div class="room-num">${escapeHtml(room.room_number)}</div><div class="badge s-${room.status}">${statusText[room.status] || room.status}</div><div class="room-meta">${escapeHtml(roomTypeText[room.room_type] || room.room_type)}<br>${escapeHtml(proximityText[room.proximity] || room.proximity)}</div></div>`
+}
+
+function renderSelects() {
+    const roomOptions = state.rooms.map(r => `<option value="${escapeHtml(r.room_number)}">${escapeHtml(r.room_number)} — ${statusText[r.status] || r.status}</option>`).join('')
+    const dirtyOptions = state.rooms.filter(r => ['dirty', 'clean'].includes(r.status)).map(r => `<option value="${escapeHtml(r.room_number)}">${escapeHtml(r.room_number)} — ${statusText[r.status]}</option>`).join('')
+    ;['orderRoomSelect', 'issueRoomSelect', 'chatRoomSelect'].forEach(id => el(id).innerHTML = roomOptions)
+    el('dirtyRoomSelect').innerHTML = dirtyOptions || '<option value="">Mos xona yo‘q</option>'
+    el('menuSelect').innerHTML = state.menu.map(item => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name)} — $${item.price}</option>`).join('')
+    el('guestMenuSelect').innerHTML = el('menuSelect').innerHTML
+}
+
+function renderGuests() {
+    el('guestsTable').innerHTML = state.guests.map(g => `<tr><td>${escapeHtml(g.guest_id)}</td><td>${escapeHtml(g.full_name)}</td><td>${escapeHtml(g.room_number)}</td><td>${escapeHtml(roomTypeText[g.room_type] || g.room_type)}</td><td>${formatTime(g.check_in_time)}</td></tr>`).join('') || '<tr><td colspan="5">Faol mehmonlar yo‘q</td></tr>'
+}
+
+function renderCleaning() {
+    const dirty = state.rooms.filter(r => r.status === 'dirty')
+    el('dirtyRoomsList').innerHTML = dirty.length ? dirty.map(r => `<span><b>${escapeHtml(r.room_number)}</b> xona tozalashga muhtoj</span>`).join('') : '<span>Iflos xona yo‘q.</span>'
+    el('tasksTable').innerHTML = state.tasks.map(task => `<tr><td>${escapeHtml(task.room_number)}</td><td><span class="badge s-${task.status}">${statusText[task.status] || task.status}</span></td><td>${priorityText[task.priority] || task.priority}</td><td>${escapeHtml(task.assigned_to || 'Tayinlanmagan')}</td><td>${task.status !== 'completed' ? `<button class="btn" data-action="start-cleaning" data-id="${task.id}">Boshlash</button> <button class="btn primary" data-action="complete-cleaning" data-id="${task.id}">Yakunlash</button>` : 'Yakunlangan'}</td></tr>`).join('') || '<tr><td colspan="5">Tozalash vazifalari yo‘q</td></tr>'
+}
+
+function renderRoomService() {
+    el('menuTable').innerHTML = state.menu.map(item => `<tr><td>${escapeHtml(item.name)}</td><td>${escapeHtml(categoryText[item.category] || item.category)}</td><td>$${item.price}</td></tr>`).join('')
+    el('ordersTable').innerHTML = state.orders.map(order => `<tr><td>${escapeHtml(order.room_number)}</td><td>${escapeHtml(order.item_name)}</td><td>${order.quantity}</td><td>$${order.total_price}</td><td><span class="badge s-${order.status}">${statusText[order.status] || order.status}</span></td><td>${order.status !== 'delivered' && order.status !== 'cancelled' ? `<button class="btn primary" data-action="deliver-order" data-id="${order.id}">Yetkazildi</button>` : 'Yopilgan'}</td></tr>`).join('') || '<tr><td colspan="6">Buyurtmalar yo‘q</td></tr>'
+}
+
+function renderMaintenance() {
+    el('techTable').innerHTML = state.technicians.map(t => `<tr><td>${t.employee_id}</td><td>${escapeHtml(t.full_name)}</td><td>${escapeHtml(shiftText[t.shift] || t.shift)}</td><td>${t.is_available ? 'Bo‘sh' : 'Band'}</td></tr>`).join('')
+    const sorted = [...state.issues].sort((a,b) => priorityRank(a.priority) - priorityRank(b.priority))
+    el('issuesTable').innerHTML = sorted.map(issue => `<tr class="${issue.priority === 'critical' && issue.status !== 'completed' ? 'critical-row' : ''}"><td>${escapeHtml(issue.room_number)}</td><td>${escapeHtml(issue.description)}</td><td><span class="badge s-${issue.priority}">${priorityText[issue.priority] || issue.priority}</span></td><td><span class="badge s-${issue.status}">${statusText[issue.status] || issue.status}</span></td><td>${escapeHtml(issue.assigned_to || 'Navbatda')}</td><td>${issue.status !== 'completed' ? `<button class="btn primary" data-action="complete-issue" data-id="${issue.id}">Yakunlash</button>` : 'Yakunlangan'}</td></tr>`).join('') || '<tr><td colspan="6">Texnik muammolar yo‘q</td></tr>'
+}
+
+function renderChat() {
+    el('chatMessages').innerHTML = state.messages.slice().reverse().map(msg => `<div class="chat-message"><b>${escapeHtml(msg.sender)}</b>: ${escapeHtml(msg.message)}<small>${msg.room_number ? `Xona ${escapeHtml(msg.room_number)} / ` : ''}${formatTime(msg.created_at)}</small></div>`).join('') || '<p class="hint">Hali xabarlar yo‘q.</p>'
+}
+
+function guestRecord() {
+    const session = state.session || {}
+    return state.guests.find(g => g.guest_id === session.guest_id) || state.guests.find(g => g.full_name === session.full_name) || null
+}
+
+function renderGuestViews() {
+    if (!state.session || state.session.role !== 'guest') return
+    const guest = guestRecord()
+    const room = guest ? state.rooms.find(r => r.room_number === guest.room_number) : null
+    const guestId = guest?.guest_id || state.session.guest_id
+    const orders = state.orders.filter(o => o.guest_id === guestId || o.room_number === guest?.room_number)
+    el('guestProfileName').textContent = state.session.full_name
+    el('guestRoomSummary').innerHTML = guest && room ? `<div class="summary-row"><b>${escapeHtml(room.room_number)}-xona</b><br>${roomTypeText[room.room_type] || room.room_type}, ${statusText[room.status] || room.status}</div><div class="summary-row"><b>Mehmon ID:</b> ${escapeHtml(guest.guest_id)}</div>` : '<div class="summary-row">Xona hali biriktirilmagan. Qabulxonaga murojaat qiling.</div>'
+    el('guestRoomBoard').innerHTML = room ? `<div class="floor"><div class="room-list">${roomCard(room)}</div></div>` : '<p class="hint">Sizga biriktirilgan xona topilmadi.</p>'
+    el('guestOrdersTable').innerHTML = orders.map(order => `<tr><td>${escapeHtml(order.room_number)}</td><td>${escapeHtml(order.item_name)}</td><td>${order.quantity}</td><td>$${order.total_price}</td><td><span class="badge s-${order.status}">${statusText[order.status] || order.status}</span></td></tr>`).join('') || '<tr><td colspan="5">Buyurtmalar yo‘q</td></tr>'
+    el('guestInfoList').innerHTML = `<div class="summary-row"><b>F.I.Sh.:</b> ${escapeHtml(state.session.full_name)}</div><div class="summary-row"><b>Email:</b> ${escapeHtml(state.session.email)}</div><div class="summary-row"><b>Rol:</b> ${roleText[state.session.role]}</div><div class="summary-row"><b>Mehmon ID:</b> ${escapeHtml(state.session.guest_id || 'Kiritilmagan')}</div>`
+}
+
+function addEvent(data) { state.events.unshift({ ...data, local_time: new Date().toISOString() }); state.events = state.events.slice(0, 80); renderEvents() }
+function renderEvents() {
+    const html = state.events.map(event => `<li><div class="event-time">${formatTime(event.local_time || event.created_at)}</div><div class="event-type">${eventLabels[event.event] || 'Hodisa'}</div><div>${escapeHtml(eventText(event))}</div></li>`).join('') || '<li><div class="event-time">Hozir</div><div class="event-type">Kutilmoqda</div><div>Yangi operatsion hodisalar shu yerda ko‘rinadi.</div></li>'
+    el('eventList').innerHTML = html
+    el('activityTimeline').innerHTML = html
+}
+
+function eventText(event) {
+    switch (event.event) {
+        case 'checkin': return `${event.guest_name || 'Mehmon'} ${event.room_number} xonaga joylashdi`
+        case 'checkout': return `${event.room_number} xona bo‘shatildi`
+        case 'cleaning_started': return `${event.room_number} xonada tozalash boshlandi`
+        case 'room_cleaned': return `${event.room_number} xona tayyorlandi`
+        case 'new_order': return `${event.room_number} xona uchun buyurtma yaratildi`
+        case 'order_delivered': return `${event.room_number} xona buyurtmasi yetkazildi`
+        case 'maintenance_request': return `${event.room_number} xona: ${event.description || 'texnik muammo'}`
+        case 'maintenance_completed': return `${event.room_number} xona texnik ishi yakunlandi`
+        case 'chat_message': return `${event.sender || 'Xodim'}: ${event.message || 'yangi xabar'}`
+        default: return JSON.stringify(event)
+    }
+}
+
+function priorityRank(priority) { return { critical: 0, high: 1, normal: 2, low: 3 }[priority] ?? 4 }
+
+document.addEventListener('click', async event => {
+    const button = event.target.closest('button')
+    if (!button) return
+    if (button.dataset.authTab) {
+        document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.toggle('active', tab === button))
+        el('loginForm').classList.toggle('hidden', button.dataset.authTab !== 'login')
+        el('signupForm').classList.toggle('hidden', button.dataset.authTab !== 'signup')
+    }
+    if (button.dataset.view) setView(button.dataset.view)
+    if (!button.dataset.action) return
+    try {
+        if (button.dataset.action === 'start-cleaning') await api(`/api/cleaning/tasks/${button.dataset.id}`, { method: 'PATCH', body: JSON.stringify({ status: 'in_progress' }) })
+        if (button.dataset.action === 'complete-cleaning') await api(`/api/cleaning/tasks/${button.dataset.id}`, { method: 'PATCH', body: JSON.stringify({ status: 'completed' }) })
+        if (button.dataset.action === 'deliver-order') await api(`/api/room/orders/${button.dataset.id}`, { method: 'PATCH', body: JSON.stringify({ status: 'delivered' }) })
+        if (button.dataset.action === 'complete-issue') await api(`/api/maintenance/issues/${button.dataset.id}`, { method: 'PATCH', body: JSON.stringify({ status: 'completed' }) })
+        notify('Amal bajarildi'); await loadAll()
+    } catch (error) { notify(error.message, 'bad') }
+})
+
+el('logoutBtn').addEventListener('click', clearSession)
+
+function bindForm(id, handler) {
+    el(id).addEventListener('submit', async event => {
+        event.preventDefault()
+        try { await handler(new FormData(event.target), event.target); event.target.reset(); await loadAll() }
+        catch (error) { notify(error.message, 'bad') }
+    })
+}
+
+el('loginForm').addEventListener('submit', event => {
+    event.preventDefault()
+    const form = new FormData(event.target)
+    const user = users().find(u => u.email === form.get('email') && u.password === form.get('password'))
+    if (!user) return notify('Email yoki parol noto‘g‘ri', 'bad')
+    setSession(user)
+})
+
+el('signupForm').addEventListener('submit', event => {
+    event.preventDefault()
+    const form = new FormData(event.target)
+    const list = users()
+    const email = form.get('email')
+    if (list.some(u => u.email === email)) return notify('Bu email bilan hisob mavjud', 'bad')
+    const user = { full_name: form.get('full_name'), email, password: form.get('password'), role: form.get('role'), guest_id: form.get('guest_id') || '' }
+    list.push(user); saveUsers(list); notify('Hisob yaratildi'); setSession(user)
+})
+
+bindForm('checkinForm', async form => {
+    const payload = Object.fromEntries(form.entries())
+    payload.floor_preference = payload.floor_preference ? Number(payload.floor_preference) : null
+    const result = await api('/api/reception/checkin', { method: 'POST', body: JSON.stringify(payload) })
+    el('lastAssignment').textContent = `Oxirgi tayinlash: ${result.guest_name} → ${result.room_number}-xona`
+    notify(`${result.room_number}-xona tayinlandi`)
+})
+bindForm('checkoutForm', async form => { await api('/api/reception/checkout', { method: 'POST', body: JSON.stringify({ guest_id: form.get('guest_id'), discount_percent: Number(form.get('discount_percent') || 0) }) }); notify('Chiqish jarayoni yakunlandi') })
+bindForm('guestSearchForm', async form => { const guest = await api(`/api/reception/guests/${form.get('guest_id')}`); el('guestSearchResult').textContent = `${guest.full_name}: ${guest.room_number}-xona, ${roomTypeText[guest.room_type] || guest.room_type}` })
+bindForm('cleanTaskForm', async form => { await api('/api/cleaning/tasks', { method: 'POST', body: JSON.stringify(Object.fromEntries(form.entries())) }); notify('Tozalash vazifasi yaratildi') })
+bindForm('orderForm', async form => { await createOrder(form, 'menuSelect'); notify('Buyurtma yaratildi') })
+bindForm('issueForm', async form => { await api('/api/maintenance/issues', { method: 'POST', body: JSON.stringify(Object.fromEntries(form.entries())) }); notify('Texnik so‘rov yaratildi') })
+bindForm('chatForm', async form => { await api('/api/chat/messages', { method: 'POST', body: JSON.stringify(Object.fromEntries(form.entries())) }); notify('Xabar yuborildi') })
+bindForm('guestOrderForm', async form => {
+    const guest = guestRecord()
+    if (!guest) throw new Error('Avval qabulxonada ro‘yxatdan o‘ting')
+    form.set('room_number', guest.room_number)
+    form.set('guest_id', guest.guest_id)
+    await createOrder(form, 'guestMenuSelect')
+    notify('Buyurtma yuborildi')
+})
+bindForm('guestIssueForm', async form => {
+    const guest = guestRecord()
+    if (!guest) throw new Error('Avval qabulxonada ro‘yxatdan o‘ting')
+    await api('/api/maintenance/issues', { method: 'POST', body: JSON.stringify({ room_number: guest.room_number, priority: form.get('priority'), description: form.get('description') }) })
+    notify('Texnik yordam so‘rovi yuborildi')
+})
+
+async function createOrder(form, menuId) {
+    const selected = state.menu.find(item => String(item.id) === String(el(menuId).value))
+    if (!selected) throw new Error('Menyu tanlanmadi')
+    const payload = Object.fromEntries(form.entries())
+    payload.menu_item_id = selected.id
+    payload.item_name = selected.name
+    payload.category = selected.category
+    payload.quantity = Number(payload.quantity)
+    delete payload.notes
+    await api('/api/room/orders', { method: 'POST', body: JSON.stringify(payload) })
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null')
+    state.session = session
+    session ? showApp() : showAuth()
+})
+</script>
+</body>
+</html>

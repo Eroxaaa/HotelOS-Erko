@@ -1,0 +1,260 @@
+# HotelOS Docker Configuration
+
+name: hotelos
+
+services:
+
+  # -------------------------
+  # Message Broker
+  # -------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: hotelos-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: always
+
+  # -------------------------
+  # Reception Service
+  # -------------------------
+  reception-db:
+    image: postgres:15-alpine
+    container_name: reception-db
+    environment:
+      POSTGRES_USER: reception_user
+      POSTGRES_PASSWORD: reception_pass
+      POSTGRES_DB: reception_db
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reception_user -d reception_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: always
+
+  reception-service:
+    build: ./reception-service
+    container_name: reception-service
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://reception_user:reception_pass@reception-db:5432/reception_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      reception-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: always
+
+  # -------------------------
+  # Cleaning Service
+  # -------------------------
+  cleaning-db:
+    image: postgres:15-alpine
+    container_name: cleaning-db
+    environment:
+      POSTGRES_USER: cleaning_user
+      POSTGRES_PASSWORD: cleaning_pass
+      POSTGRES_DB: cleaning_db
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cleaning_user -d cleaning_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: always
+
+  cleaning-service:
+    build: ./cleaning-service
+    container_name: cleaning-service
+    ports:
+      - "8002:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://cleaning_user:cleaning_pass@cleaning-db:5432/cleaning_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      cleaning-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: always
+
+  # -------------------------
+  # Room Service
+  # -------------------------
+  room-db:
+    image: postgres:15-alpine
+    container_name: room-db
+    environment:
+      POSTGRES_USER: room_user
+      POSTGRES_PASSWORD: room_pass
+      POSTGRES_DB: room_db
+    ports:
+      - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U room_user -d room_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: always
+
+  room-service:
+    build: ./room-service
+    container_name: room-service
+    ports:
+      - "8003:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://room_user:room_pass@room-db:5432/room_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      room-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: always
+
+  # -------------------------
+  # Maintenance Service
+  # -------------------------
+  maintenance-db:
+    image: postgres:15-alpine
+    container_name: maintenance-db
+    environment:
+      POSTGRES_USER: maintenance_user
+      POSTGRES_PASSWORD: maintenance_pass
+      POSTGRES_DB: maintenance_db
+    ports:
+      - "5436:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maintenance_user -d maintenance_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: always
+
+  maintenance-service:
+    build: ./maintenance-service
+    container_name: maintenance-service
+    ports:
+      - "8004:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://maintenance_user:maintenance_pass@maintenance-db:5432/maintenance_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      maintenance-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: always
+
+  # -------------------------
+  # Chat Service
+  # -------------------------
+  chat-service:
+    build: ./chat-service
+    container_name: chat-service
+    ports:
+      - "8005:8000"
+    environment:
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: always
+
+  # -------------------------
+  # Dashboard
+  # -------------------------
+  dashboard:
+    build: ./dashboard
+    container_name: hotelos-dashboard
+    ports:
+      - "3000:80"
+    depends_on:
+      redis:
+        condition: service_healthy
+      reception-service:
+        condition: service_healthy
+      cleaning-service:
+        condition: service_healthy
+      room-service:
+        condition: service_healthy
+      maintenance-service:
+        condition: service_healthy
+      chat-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:80/health', timeout=3).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: always
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: hotelos-api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      RECEPTION_URL: http://reception-service:8000
+      CLEANING_URL: http://cleaning-service:8000
+      ROOM_URL: http://room-service:8000
+      MAINTENANCE_URL: http://maintenance-service:8000
+      CHAT_URL: http://chat-service:8000
+    depends_on:
+      reception-service:
+        condition: service_healthy
+      cleaning-service:
+        condition: service_healthy
+      room-service:
+        condition: service_healthy
+      maintenance-service:
+        condition: service_healthy
+      chat-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: always
